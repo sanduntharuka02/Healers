@@ -1,0 +1,342 @@
+<?php
+//include("auth_session.php");
+include 'includes/header.php';
+/*$ready_user = $_SESSION['user_type'];
+if($ready_user != "Admin"){
+  header("Location: index.php");
+}*/
+?>
+
+<style type="text/css">
+
+	form.register-form, form.login-form, form#pahere_payement_form, form#paypal_form, form#product_items_admin_CRUD{
+  width: 700px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 5px;
+}
+#buy_now_btn {
+  background-color: #413bff;
+  border: 0px solid transparent;
+  border-radius: 5px;
+  padding: 10px 40px;
+  color: #ffffff;
+}
+form#pahere_payement_form div div, form#paypal_form div div, #product_items_admin_CRUD div div div{
+  width: 48% !important;
+  display: inline-block !important;
+  vertical-align: top !important;
+  padding: 0px 20px;
+}
+/* =================== */
+@media(max-width: 768px){
+  form#pahere_payement_form div div, form#paypal_form div div, #product_items_admin_CRUD div div div{
+    width: 100% !important;
+    display: inline-block !important;
+  }
+}
+
+</style>
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-12 text-center home-banner">
+        
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="container-fluid" style="padding: 20px 15px !important;padding-top: 70px !important;">
+	<div class="row">
+
+		<div class="col-lg-12 text-center">
+			<h5><a href="adminpanel.php"><strong>Back to Dashboard</strong></a></h5>
+	      <h4>Supplier Details Section</h4><br>
+	    </div>
+
+	    <div class="col-lg-12" id="crud_reload_position">
+			<div class="present_post_details text-left">
+
+				<?php require_once 'models/process_banners.php';?>
+
+				<?php
+					if (isset($_SESSION['message'])):
+				?>
+
+				<div class="alert-<?=$_SESSION['message_type']?>">
+					<?php
+						echo $_SESSION['message'];
+						unset($_SESSION['message']);
+					?>
+				</div>
+
+				<?php 
+					endif
+				?>
+
+				<div id="crud_wrapper" style="width:100%;margin: 0 auto;">
+					<form action="models/process_banners.php" method="POST" id="product_items_admin_CRUD" class="form-bg-all-glass" enctype="multipart/form-data">
+						<div id="crud_operation_section" style="padding-top: 30px;">
+							<div class="row" style="">
+	
+								<div class="form-group">
+									<input type="hidden" name="id" value="<?php echo $id;?>"></input>
+									<label>Title:</label><br>
+									<input type="text" name="title"  class="form-control" value="<?php echo $title; ?>"></input>
+								</div>
+
+
+								<div class="form-group">
+									<label>Link:</label><br>
+									<input type="text" name="link"  class="form-control" value="<?php echo $link; ?>"></input>
+								</div>
+
+								<div class="form-group">
+									<label>Description:</label><br>
+									<input type="text" name="description"  class="form-control" value="<?php echo $description; ?>"></input>
+								</div>
+
+								<div class="form-group" style="width: calc(100% - 30px) !important;">
+									<label>Banner Image:</label><br>
+									<input type="file" name="product_image" id="product_file" class="form-control"  onchange="validateProductFileExtension(this.value);" value="<?php echo $product_image; ?>" style="display:none;"></input>
+									<label for="product_file" id="product_file_script_styles" class="form-control">Select Product Image</label>
+								</div>
+
+								<div class="form-group">
+								</div>
+								<div style="width:100% !important;text-align:center !important;">
+									<?php if ($update == true): ?>
+
+										<button type="submit" name="update" class="btn btn-success">Update Record</button>
+										<button type="submit" name="cancel" class="btn btn-warning">cancel</button><br><br>
+
+									<?php else: ?>
+								
+										<button type="submit" name="save" class="btn btn-success">Insert Record</button>
+										
+									<?php endif ?>
+								</div>
+							</div>
+						</div>
+					</form>
+					
+				</div>
+			</div>
+		</div>
+
+
+	</div>
+</div>
+
+
+
+
+
+
+<div class="container" style="padding: 20px 15px !important;">
+	<div class="row">
+
+		<div class="col-lg-12" style="padding-left:20px;text-align: center;">
+
+			<label><strong>Search any supplier info:</strong></label><br>
+			<input class="search-input" index-table="auto-search" id="search" placeholder=" Search ..." style="border-radius: 4px !important;
+			border: 1px solid #000000 !important;width:400px;max-width:90%;"/><br>
+
+		</div>
+
+		<div id="index_table_section" class="table-responsive" style="overflow: auto;width: 90% !important;margin: 0px auto !important;" >
+						
+			<br>
+			<table border="0" width="1000px" cellpadding="0" cellspacing="0" class="auto-search table table-light table-striped text-left">
+
+			<?php
+
+			require_once "db.php";
+
+			// Check connection
+			if ($conn->connect_error) {
+			  die("Connection failed: " . $conn->connect_error);
+			}
+
+			$sql = "SELECT * FROM banners";
+			$result = $conn->query($sql);
+
+			if ($result->num_rows > 0) {
+
+			  echo "<tr class='index-table-heading' style='border-top: 1px solid #202020 !important;border-color: unset !important;'>
+						<th>ID</th>
+						<th>Title</th>
+						<th>Link</th>
+						<th>Description</th>
+						<th>Banner Image</th>
+						<th>Status</th>
+						<th>Action</th>
+					</tr>";
+
+			  while($row = $result->fetch_assoc()) {
+			  	  if ($row["status"] != 0){
+				    echo "<tr style='border-top: 1px solid #202020 !important;border-color: unset !important;'>
+				    <td>".$row["id"]."</td>
+				    <td>".$row["title"]."</td>
+				    <td>".$row["link"]."</td>
+				    <td>".$row["description"]."</td>
+				    <td><img src='catelog/images/system_banners/".$row["product_image"]."' style='width:120px; height:70px;'/></td>
+				    <td>".$row["status"]."</td>";
+				  }
+			   ?>
+
+
+			   <?php
+			     if ($row["status"] != 0){
+			   ?>
+			    <td>
+				    <a href="admin_banners.php?edit=<?php echo $row["id"]; ?>" class="btn btn-info">Edit</a>&emsp;
+					<a href="admin_banners.php?remove=<?php echo $row["id"]; ?>" class="btn btn-danger" style="color:#ffffff !important;">
+                      Delete</a>
+				</td>
+
+			    </tr>
+			   <?php
+			     }
+			   ?>
+
+
+			    <?php
+			  }
+
+			  echo "<br>";
+
+			} else {
+
+			  echo "0 results";
+			  echo "<br>";
+
+			}
+
+			$conn->close();
+
+			?>
+
+			</table>
+
+		</div>
+		<div class="col-lg-12 text-center" style="padding-top:40px;">
+			<h5><a href="adminpanel.php"><strong>Back to Dashboard</strong></a></h5>
+	    </div>
+	</div>
+</div>
+
+
+
+
+
+
+
+<script type="text/javascript" language="javascript">
+
+(function(document) {
+	'use strict';
+	var TableFilter = (function(myArray) {
+		var search_input;
+
+		function _onInputSearch(e) {
+			search_input = e.target;
+			var tables = document.getElementsByClassName(search_input.getAttribute('index-table'));
+			myArray.forEach.call(tables, function(table) {
+				myArray.forEach.call(table.tBodies, function(tbody) {
+					myArray.forEach.call(tbody.rows, function(row) {
+						if (!row.classList.contains("index-table-heading")) {
+							var text_content = row.textContent.toLowerCase();
+							var search_val = search_input.value.toLowerCase();
+							row.style.display = text_content.indexOf(search_val) > -1 ? '' : 'none';
+						}
+					});
+				});
+			});
+		}
+		return {
+			init: function() {
+				var inputs = document.getElementsByClassName('search-input');
+				myArray.forEach.call(inputs, function(input) {
+					input.oninput = _onInputSearch;
+				});
+			}
+		};
+	})(Array.prototype);
+	document.addEventListener('readystatechange', function() {
+		if (document.readyState === 'complete') {
+			TableFilter.init();
+		}
+	});
+})(document);
+
+</script>
+
+<!-- js image validation -->
+
+<script type="text/javascript" language="javascript">
+// Upload Product Image Files and Extention validation - Execution
+function validateProductFileExtension(product_file){
+ 
+  var ext = product_file.substr(product_file.lastIndexOf('.')+1);
+  var allow_ = ["png","jpg","jpeg"];
+
+  if ((allow_[0].lastIndexOf(ext) == -1) && (allow_[1].lastIndexOf(ext) == -1) && (allow_[2].lastIndexOf(ext) == -1)){
+    $('#product_file').val("");
+    window.alert("Please check the file extension.\nThe program will be accepted only '.png, '.jpg' or '.jpeg' files only.");
+    document.getElementById("product_file_script_styles").style.background="#ffffff";
+    document.getElementById("product_file_script_styles").style.color="#555555";
+  }
+  else{
+    document.getElementById("product_file_script_styles").style.background="#7895E7";
+    document.getElementById("product_file_script_styles").style.color="#000000";
+    window.alert("Your product image is ready for upload.");
+  }
+}
+// Upload Product Image Files and Extention validation - Execution
+</script>
+
+<!-- js image validation -->
+
+<?php
+include 'includes/footer.php';
+?>
+
+
+
+
+
+
+<!--
+	
+<table border="0" width="100%" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+			
+		</td>
+	</tr>
+</table>
+
+<div class="row">
+	<div class="col-12">
+
+	</div>
+</div>
+
+
+id
+product_name
+category
+price
+stock
+description
+sub
+bin
+status
+
+
+-->
